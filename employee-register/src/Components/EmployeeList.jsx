@@ -12,7 +12,6 @@ import {
   DialogTitle,
   TextField,
   CircularProgress,
-  IconButton,
   Snackbar,
   Alert,
 } from "@mui/material";
@@ -20,23 +19,38 @@ import { Link, useNavigate } from "react-router-dom";
 import Employees from "./Employees";
 import Footer from "./Footer";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import { auth } from "../firebase"; 
 
 const EmployeeList = ({ admin, setAdmin }) => {
   const [openProfile, setOpenProfile] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(admin.picture || "");
-  const [newName, setNewName] = useState(admin.username);
+  const [profilePicture, setProfilePicture] = useState(admin?.picture || "");
+  const [newName, setNewName] = useState(admin?.username || "");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const [openDialog, setOpenDialog] = useState(false);
-  const [adminProfile, setAdminProfile] = useState({ username: '', password: '' });
-  const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' });
+  const [adminProfile, setAdminProfile] = useState({
+    username: "",
+    password: "",
+  });
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Check if admin is logged in; if not, redirect to login page
+  useEffect(() => {
+    if (!admin) {
+      navigate("/login");
+    }
+  }, [admin, navigate]);
 
   useEffect(() => {
-    const storedAdmin = JSON.parse(localStorage.getItem('admin'));
+    const storedAdmin = JSON.parse(localStorage.getItem("admin"));
     if (storedAdmin) {
       setAdminProfile(storedAdmin);
     }
@@ -47,17 +61,21 @@ const EmployeeList = ({ admin, setAdmin }) => {
   };
 
   const handleSaveProfile = () => {
-    localStorage.setItem('admin', JSON.stringify(adminProfile));
+    localStorage.setItem("admin", JSON.stringify(adminProfile));
     setAdmin(adminProfile);
-    setAlert({ open: true, message: 'Profile updated successfully', severity: 'success' });
+    setAlert({
+      open: true,
+      message: "Profile updated successfully",
+      severity: "success",
+    });
     setOpenDialog(false);
   };
 
   useEffect(() => {
-    if (admin.picture) {
+    if (admin?.picture) {
       setProfilePicture(admin.picture);
     }
-  }, [admin.picture]);
+  }, [admin?.picture]);
 
   const handleOpenProfile = () => {
     setOpenProfile(true);
@@ -97,10 +115,15 @@ const EmployeeList = ({ admin, setAdmin }) => {
     setLogoutDialogOpen(false);
   };
 
-  const handleConfirmLogout = () => {
-    localStorage.removeItem("admin");
-    setAdmin(null);
-    navigate("/login");
+  const handleConfirmLogout = async () => {
+    try {
+      await auth.signOut();
+      // Clear admin state after logging out
+      setAdmin(null);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
@@ -124,7 +147,7 @@ const EmployeeList = ({ admin, setAdmin }) => {
               justifyContent: "flex-start",
             }}
           >
-            Welcome, {admin.username}
+            Welcome, {admin?.username || "Guest"}
             {profilePicture && (
               <img
                 src={profilePicture}
@@ -137,8 +160,7 @@ const EmployeeList = ({ admin, setAdmin }) => {
               />
             )}
           </Typography>
-          {/* onClick={handleOpenProfile} */}
-          <Button color="inherit" onClick={() => setOpenDialog(true)} >
+          <Button color="inherit" onClick={() => setOpenDialog(true)}>
             Profile
           </Button>
           <Button color="inherit" component={Link} to="/deleted">
@@ -157,7 +179,7 @@ const EmployeeList = ({ admin, setAdmin }) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center", 
+          justifyContent: "center",
           padding: "20px",
           width: "100%",
         }}
@@ -175,7 +197,7 @@ const EmployeeList = ({ admin, setAdmin }) => {
         </Container>
       </Box>
 
-      <Footer /> {/* Footer is placed here */}
+      <Footer />
 
       {/* Profile Dialog */}
       <Dialog open={openProfile} onClose={handleCloseProfile}>
@@ -251,7 +273,7 @@ const EmployeeList = ({ admin, setAdmin }) => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* //// */}
+
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Edit Admin Profile</DialogTitle>
         <DialogContent>
@@ -274,8 +296,12 @@ const EmployeeList = ({ admin, setAdmin }) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="secondary">Cancel</Button>
-          <Button onClick={handleSaveProfile} color="primary">Save</Button>
+          <Button onClick={() => setOpenDialog(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveProfile} color="primary">
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -284,7 +310,10 @@ const EmployeeList = ({ admin, setAdmin }) => {
         autoHideDuration={6000}
         onClose={() => setAlert({ ...alert, open: false })}
       >
-        <Alert onClose={() => setAlert({ ...alert, open: false })} severity={alert.severity}>
+        <Alert
+          onClose={() => setAlert({ ...alert, open: false })}
+          severity={alert.severity}
+        >
           {alert.message}
         </Alert>
       </Snackbar>

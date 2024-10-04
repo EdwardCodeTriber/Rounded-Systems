@@ -1,28 +1,30 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; // Import the necessary 
 import Picture from '/registerIcon.png';
 
 const Login = ({ setAdmin }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const auth = getAuth(); // Get the Firebase Auth instance
 
-  // Load admin credentials from localStorage or default to a hardcoded admin
-  const storedAdmin = JSON.parse(localStorage.getItem('admin')) || {
-    username: 'admin',
-    password: 'admin123',
-  };
+  const handleLogin = async () => {
+    try {
+      // Use Firebase's signInWithEmailAndPassword to authenticate the user
+      await signInWithEmailAndPassword(auth, email, password);
+      const user = auth.currentUser;
 
-  const handleLogin = () => {
-    // Matches the local
-    if (username === storedAdmin.username && password === storedAdmin.password) {
-      localStorage.setItem('admin', JSON.stringify({ username }));
-      setAdmin({ username });
+      // Pass the user details to setAdmin function
+      setAdmin({ username: user.email });
+
+      // Navigate to home page after successful login
       navigate('/');
-    } else {
-      setError('Invalid username or password');
+    } catch (error) {
+      setError('Invalid email or password');
+      console.error('Login error:', error);
     }
   };
 
@@ -44,11 +46,11 @@ const Login = ({ setAdmin }) => {
       </Typography>
       {error && <Typography color="error" style={{ marginBottom: '20px' }}>{error}</Typography>}
       <TextField
-        label="Username"
+        label="Email"
         fullWidth
         margin="normal"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         variant="outlined"
       />
       <TextField
