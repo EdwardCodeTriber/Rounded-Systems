@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Container,
   TextField,
@@ -25,28 +26,31 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import AddIcon from '@mui/icons-material/Add';
 
 const Employees = () => {
-  const [employees, setEmployees] = useState(() => JSON.parse(localStorage.getItem('employees')) || []);
-  const [deletedEmployees, setDeletedEmployees] = useState(() => JSON.parse(localStorage.getItem('deletedEmployees')) || []);
-  const [nextId, setNextId] = useState(() => JSON.parse(localStorage.getItem('nextId')) || 1);
+  const [employees, setEmployees] = useState([]);
   const [editIndex, setEditIndex] = useState(-1);
-  const [employee, setEmployee] = useState({ id: '', name: '', surname: '', position: '', email: '', phone: '', picture: '' });
+  const [employee, setEmployee] = useState({ id: '', name: '', surname: '', position: '', email: '', idNumber: '', picture: '' });
   const [openDialog, setOpenDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false); 
   const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' }); 
-  const [errors, setErrors] = useState({ email: '', phone: '' }); 
+  const [errors, setErrors] = useState({ email: '', idNumber: '' }); 
 
   useEffect(() => {
-    localStorage.setItem('employees', JSON.stringify(employees));
-  }, [employees]);
+    fetchEmployees();
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem('deletedEmployees', JSON.stringify(deletedEmployees));
-  }, [deletedEmployees]);
-
-  useEffect(() => {
-    localStorage.setItem('nextId', JSON.stringify(nextId));
-  }, [nextId]);
+  const fetchEmployees = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/api/employees');
+      setEmployees(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      showAlert('Failed to fetch employees', 'error');
+      setEmployees([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     setEmployee({ ...employee, [e.target.name]: e.target.value });
@@ -56,7 +60,6 @@ const Employees = () => {
     setAlert({ open: true, message, severity });
   };
 
-  // Email validation function using a regex pattern
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -71,51 +74,53 @@ const Employees = () => {
 
     setErrors({ email: emailError });
 
-    return !emailError; // Returns true if the email is valid
+    return !emailError;
   };
 
-  const handleAddEmployee = () => {
+  const handleAddEmployee = async () => {
     if (!validateForm()) {
       showAlert('Please correct the form errors', 'error');
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
+
+    try {
       if (editIndex > -1) {
-        const updatedEmployees = [...employees];
-        updatedEmployees[editIndex] = employee;
-        setEmployees(updatedEmployees);
+        await axios.put(`/api/employees/${employee.id}`, employee);
         showAlert('Employee updated successfully');
-        setEditIndex(-1);
       } else {
-        const newEmployee = { ...employee, id: nextId };
-        setEmployees([...employees, newEmployee]);
-        setNextId(nextId + 1); // Increment the next ID
+        await axios.post('/api/employees', employee);
         showAlert('Employee added successfully');
       }
-      setEmployee({ id: '', name: '', surname: '', position: '', email: '', phone: '', picture: '' });
       setOpenDialog(false);
+      fetchEmployees();
+    } catch (error) {
+      showAlert('Failed to save employee', 'error');
+    } finally {
       setLoading(false);
-    }, 1000); // Simulate loading time
+      setEmployee({ id: '', name: '', surname: '', position: '', email: '', idNumber: '', picture: '' });
+      setEditIndex(-1);
+    }
   };
 
   const handleEdit = (index) => {
     setEditIndex(index);
     setEmployee(employees[index]);
-    setOpenDialog(true); // Open the dialog for editing
+    setOpenDialog(true);
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (id) => {
     setLoading(true);
-    setTimeout(() => {
-      const removedEmployee = employees[index];
-      setDeletedEmployees([...deletedEmployees, removedEmployee]);
-      const updatedEmployees = employees.filter((_, i) => i !== index);
-      setEmployees(updatedEmployees);
+    try {
+      await axios.delete(`/api/employees/${id}`);
       showAlert('Employee deleted successfully', 'error');
+      fetchEmployees();
+    } catch (error) {
+      showAlert('Failed to delete employee', 'error');
+    } finally {
       setLoading(false);
-    }, 1000); // Simulate loading time
+    }
   };
 
   const handleImageUpload = (e) => {
@@ -128,7 +133,7 @@ const Employees = () => {
   };
 
   const handleOpenDialog = () => {
-    setEmployee({ id: '', name: '', surname: '', position: '', email: '', phone: '', picture: '' });
+    setEmployee({ id: '', name: '', surname: '', position: '', email: '', idNumber: '', picture: '' });
     setEditIndex(-1);
     setOpenDialog(true);
   };
@@ -137,10 +142,11 @@ const Employees = () => {
     setOpenDialog(false);
   };
 
-  // Filter employees based on search query
-  const filteredEmployees = employees.filter((emp) =>
-    emp.id.toString().includes(searchQuery)
-  );
+  const filteredEmployees = Array.isArray(employees) 
+    ? employees.filter((emp) => 
+        emp.id && emp.id.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   return (
     <Container>
@@ -193,9 +199,9 @@ const Employees = () => {
             helperText={errors.email} // Show error message for email validation
           />
           <TextField
-            label="Phone"
-            name="phone"
-            value={employee.phone}
+            label="ID Number"
+            name="idNumber"
+            value={employee.idNumber}
             onChange={handleInputChange}
             fullWidth
             margin="dense"
@@ -229,7 +235,7 @@ const Employees = () => {
             <TableCell>Surname</TableCell>
             <TableCell>Position</TableCell>
             <TableCell>Email</TableCell>
-            <TableCell>Phone</TableCell>
+            <TableCell>ID Number</TableCell>
             <TableCell>Image</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>

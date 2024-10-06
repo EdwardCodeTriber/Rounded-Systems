@@ -20,22 +20,19 @@ import Employees from "./Employees";
 import Footer from "./Footer";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { auth } from "../firebase"; 
+import { updateEmail, updatePassword, sendPasswordResetEmail } from "firebase/auth";
 
 const EmployeeList = ({ admin, setAdmin }) => {
   const [openProfile, setOpenProfile] = useState(false);
   const [profilePicture, setProfilePicture] = useState(admin?.picture || "");
   const [newName, setNewName] = useState(admin?.username || "");
+  const [newEmail, setNewEmail] = useState(admin?.email || ""); 
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const navigate = useNavigate();
 
-  const [openDialog, setOpenDialog] = useState(false);
-  const [adminProfile, setAdminProfile] = useState({
-    username: "",
-    password: "",
-  });
   const [alert, setAlert] = useState({
     open: false,
     message: "",
@@ -45,31 +42,9 @@ const EmployeeList = ({ admin, setAdmin }) => {
   // Check if admin is logged in; if not, redirect to login page
   useEffect(() => {
     if (!admin) {
-      navigate("/login");
+      navigate("/");
     }
   }, [admin, navigate]);
-
-  useEffect(() => {
-    const storedAdmin = JSON.parse(localStorage.getItem("admin"));
-    if (storedAdmin) {
-      setAdminProfile(storedAdmin);
-    }
-  }, []);
-
-  const handleInputChange = (e) => {
-    setAdminProfile({ ...adminProfile, [e.target.name]: e.target.value });
-  };
-
-  const handleSaveProfile = () => {
-    localStorage.setItem("admin", JSON.stringify(adminProfile));
-    setAdmin(adminProfile);
-    setAlert({
-      open: true,
-      message: "Profile updated successfully",
-      severity: "success",
-    });
-    setOpenDialog(false);
-  };
 
   useEffect(() => {
     if (admin?.picture) {
@@ -85,6 +60,80 @@ const EmployeeList = ({ admin, setAdmin }) => {
     setOpenProfile(false);
   };
 
+  // Update admin's email
+  const handleUpdateEmail = async () => {
+    if (newEmail !== admin?.email) {
+      try {
+        await updateEmail(auth.currentUser, newEmail);
+        setAdmin((prev) => ({
+          ...prev,
+          email: newEmail,
+        }));
+        setAlert({
+          open: true,
+          message: "Email updated successfully",
+          severity: "success",
+        });
+      } catch (error) {
+        console.error("Error updating email:", error);
+        setAlert({
+          open: true,
+          message: "Failed to update email",
+          severity: "error",
+        });
+      }
+    }
+  };
+
+  // Update admin's password
+  const handleUpdatePassword = async () => {
+    if (newPassword) {
+      try {
+        await updatePassword(auth.currentUser, newPassword);
+        setAlert({
+          open: true,
+          message: "Password updated successfully",
+          severity: "success",
+        });
+      } catch (error) {
+        console.error("Error updating password:", error);
+        setAlert({
+          open: true,
+          message: "Failed to update password",
+          severity: "error",
+        });
+      }
+    }
+  };
+
+  // Send password reset email
+  const handleSendResetEmail = async () => {
+    try {
+      await sendPasswordResetEmail(auth, newEmail);
+      setAlert({
+        open: true,
+        message: "Password reset email sent",
+        severity: "success",
+      });
+    } catch (error) {
+      console.error("Error sending reset email:", error);
+      setAlert({
+        open: true,
+        message: "Failed to send password reset email",
+        severity: "error",
+      });
+    }
+  };
+
+  const handleProfilePictureUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfilePicture(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleUpdateProfile = () => {
     setLoading(true);
     setTimeout(() => {
@@ -96,15 +145,6 @@ const EmployeeList = ({ admin, setAdmin }) => {
       setLoading(false);
       handleCloseProfile();
     }, 1000);
-  };
-
-  const handleProfilePictureUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfilePicture(reader.result);
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleOpenLogoutDialog = () => {
@@ -119,8 +159,8 @@ const EmployeeList = ({ admin, setAdmin }) => {
     try {
       await auth.signOut();
       // Clear admin state after logging out
-      setAdmin(null);
-      navigate("/login");
+      setAdmin(null); 
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -160,7 +200,7 @@ const EmployeeList = ({ admin, setAdmin }) => {
               />
             )}
           </Typography>
-          <Button color="inherit" onClick={() => setOpenDialog(true)}>
+          <Button color="inherit" onClick={handleOpenProfile}>
             Profile
           </Button>
           <Button color="inherit" component={Link} to="/deleted">
@@ -211,6 +251,13 @@ const EmployeeList = ({ admin, setAdmin }) => {
             onChange={(e) => setNewName(e.target.value)}
           />
           <TextField
+            label="Email"
+            fullWidth
+            margin="dense"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+          />
+          <TextField
             label="New Password"
             type="password"
             fullWidth
@@ -249,7 +296,16 @@ const EmployeeList = ({ admin, setAdmin }) => {
             Cancel
           </Button>
           <Button onClick={handleUpdateProfile} color="primary">
-            Update
+            Update Profile
+          </Button>
+          <Button onClick={handleUpdateEmail} color="primary">
+            Update Email
+          </Button>
+          <Button onClick={handleUpdatePassword} color="primary">
+            Update Password
+          </Button>
+          <Button onClick={handleSendResetEmail} color="primary">
+            Reset Password via Email
           </Button>
         </DialogActions>
       </Dialog>
@@ -270,37 +326,6 @@ const EmployeeList = ({ admin, setAdmin }) => {
             sx={{ backgroundColor: "red" }}
           >
             Logout
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Edit Admin Profile</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Username"
-            name="username"
-            fullWidth
-            margin="dense"
-            value={adminProfile.username}
-            onChange={handleInputChange}
-          />
-          <TextField
-            label="Password"
-            name="password"
-            type="password"
-            fullWidth
-            margin="dense"
-            value={adminProfile.password}
-            onChange={handleInputChange}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleSaveProfile} color="primary">
-            Save
           </Button>
         </DialogActions>
       </Dialog>
