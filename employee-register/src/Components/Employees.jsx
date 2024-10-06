@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Container,
   TextField,
@@ -19,21 +19,33 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import AddIcon from '@mui/icons-material/Add';
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import AddIcon from "@mui/icons-material/Add";
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [editIndex, setEditIndex] = useState(-1);
-  const [employee, setEmployee] = useState({ id: '', name: '', surname: '', position: '', email: '', idNumber: '', picture: '' });
+  const [employee, setEmployee] = useState({
+    id: "",
+    name: "",
+    surname: "",
+    position: "",
+    email: "",
+    idNumber: "",
+    picture: "",
+  });
   const [openDialog, setOpenDialog] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false); 
-  const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' }); 
-  const [errors, setErrors] = useState({ email: '', idNumber: '' }); 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [errors, setErrors] = useState({ email: "", idNumber: "" });
 
   useEffect(() => {
     fetchEmployees();
@@ -42,10 +54,10 @@ const Employees = () => {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/employees');
+      const response = await axios.get("/api/employees");
       setEmployees(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      showAlert('Failed to fetch employees', 'error');
+      showAlert("Failed to fetch employees", "error");
       setEmployees([]);
     } finally {
       setLoading(false);
@@ -56,7 +68,7 @@ const Employees = () => {
     setEmployee({ ...employee, [e.target.name]: e.target.value });
   };
 
-  const showAlert = (message, severity = 'success') => {
+  const showAlert = (message, severity = "success") => {
     setAlert({ open: true, message, severity });
   };
 
@@ -66,10 +78,10 @@ const Employees = () => {
   };
 
   const validateForm = () => {
-    let emailError = '';
+    let emailError = "";
 
     if (!validateEmail(employee.email)) {
-      emailError = 'Invalid email format';
+      emailError = "Invalid email format";
     }
 
     setErrors({ email: emailError });
@@ -79,27 +91,50 @@ const Employees = () => {
 
   const handleAddEmployee = async () => {
     if (!validateForm()) {
-      showAlert('Please correct the form errors', 'error');
+      showAlert("Please correct the form errors", "error");
       return;
     }
 
     setLoading(true);
 
     try {
+      const employeeData = {
+        id: employee.id, // unique identifier
+        name: employee.name,
+        surname: employee.surname,
+        position: employee.position,
+        email: employee.email,
+        idNumber: employee.idNumber,
+        picture: employee.picture || null,
+      };
+
       if (editIndex > -1) {
-        await axios.put(`/api/employees/${employee.id}`, employee);
-        showAlert('Employee updated successfully');
+        await axios.put(
+          `http://localhost:5000/api/employees/${employee.id}`,
+          employeeData
+        );
+        showAlert("Employee updated successfully");
       } else {
-        await axios.post('/api/employees', employee);
-        showAlert('Employee added successfully');
+        await axios.post("http://localhost:5000/api/employees", employeeData);
+        showAlert("Employee added successfully");
       }
+
       setOpenDialog(false);
       fetchEmployees();
     } catch (error) {
-      showAlert('Failed to save employee', 'error');
+      showAlert("Failed to save employee", "error");
     } finally {
       setLoading(false);
-      setEmployee({ id: '', name: '', surname: '', position: '', email: '', idNumber: '', picture: '' });
+      // Reset the form state
+      setEmployee({
+        id: "",
+        name: "",
+        surname: "",
+        position: "",
+        email: "",
+        idNumber: "",
+        picture: "",
+      });
       setEditIndex(-1);
     }
   };
@@ -114,10 +149,10 @@ const Employees = () => {
     setLoading(true);
     try {
       await axios.delete(`/api/employees/${id}`);
-      showAlert('Employee deleted successfully', 'error');
+      showAlert("Employee deleted successfully", "error");
       fetchEmployees();
     } catch (error) {
-      showAlert('Failed to delete employee', 'error');
+      showAlert("Failed to delete employee", "error");
     } finally {
       setLoading(false);
     }
@@ -133,7 +168,15 @@ const Employees = () => {
   };
 
   const handleOpenDialog = () => {
-    setEmployee({ id: '', name: '', surname: '', position: '', email: '', idNumber: '', picture: '' });
+    setEmployee({
+      id: "",
+      name: "",
+      surname: "",
+      position: "",
+      email: "",
+      idNumber: "",
+      picture: "",
+    });
     setEditIndex(-1);
     setOpenDialog(true);
   };
@@ -142,15 +185,23 @@ const Employees = () => {
     setOpenDialog(false);
   };
 
-  const filteredEmployees = Array.isArray(employees) 
-    ? employees.filter((emp) => 
-        emp.id && emp.id.toString().toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredEmployees = Array.isArray(employees)
+    ? employees.filter(
+        (emp) =>
+          emp.id &&
+          emp.id.toString().toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom sx={{display:"flex", justifyContent:'center'}}>Employee Registration System</Typography>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ display: "flex", justifyContent: "center" }}
+      >
+        Employee Registration System
+      </Typography>
 
       <TextField
         label="Search by Employee ID"
@@ -162,7 +213,9 @@ const Employees = () => {
       />
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle sx={{ display: "flex", justifyContent: "center" }}>{editIndex > -1 ? 'Edit Employee' : 'Add Employee'}</DialogTitle>
+        <DialogTitle sx={{ display: "flex", justifyContent: "center" }}>
+          {editIndex > -1 ? "Edit Employee" : "Add Employee"}
+        </DialogTitle>
         <DialogContent>
           <TextField
             label="Name"
@@ -209,23 +262,59 @@ const Employees = () => {
           <br />
           <br />
 
-          <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="image-upload" />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
+            id="image-upload"
+          />
           <label htmlFor="image-upload">
-            <Button variant="contained" component="span" startIcon={<AddPhotoAlternateIcon />}>Upload Picture</Button>
+            <Button
+              variant="contained"
+              component="span"
+              startIcon={<AddPhotoAlternateIcon />}
+            >
+              Upload Picture
+            </Button>
           </label>
-          {employee.picture && <img src={employee.picture} alt="Employee" width="100" />}
+          {employee.picture && (
+            <img src={employee.picture} alt="Employee" width="100" />
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="secondary" sx={{ color: "yellow" }}>Cancel</Button>
-          <Button onClick={handleAddEmployee} color="primary" sx={{ color: "green" }}>
-            {loading ? <CircularProgress size={24} sx={{ color: "white" }} /> : (editIndex > -1 ? 'Update Employee' : 'Add Employee')}
+          <Button
+            onClick={handleCloseDialog}
+            color="secondary"
+            sx={{ color: "yellow" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddEmployee}
+            color="primary"
+            sx={{ color: "green" }}
+          >
+            {loading ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : editIndex > -1 ? (
+              "Update Employee"
+            ) : (
+              "Add Employee"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
       <br />
       <br />
 
-      <Typography variant="h6" gutterBottom sx={{ display: 'flex', justifyContent: 'center' }}>Employee List</Typography>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ display: "flex", justifyContent: "center" }}
+      >
+        Employee List
+      </Typography>
       <br />
       <Table>
         <TableHead>
@@ -248,12 +337,26 @@ const Employees = () => {
               <TableCell>{emp.surname}</TableCell>
               <TableCell>{emp.position}</TableCell>
               <TableCell>{emp.email}</TableCell>
-              <TableCell>{emp.phone}</TableCell>
-              <TableCell>{emp.picture && <img src={emp.picture} alt={emp.name} width="50" />}</TableCell>
+              <TableCell>{emp.idNumber}</TableCell>
               <TableCell>
-                <IconButton sx={{ backgroundColor: "yellow" }} onClick={() => handleEdit(index)}><EditIcon /></IconButton>
-                
-                <IconButton sx={{ backgroundColor: "red" }} onClick={() => handleDelete(index)}><DeleteIcon /></IconButton>
+                {emp.picture && (
+                  <img src={emp.picture} alt={emp.name} width="50" />
+                )}
+              </TableCell>
+              <TableCell>
+                <IconButton
+                  sx={{ backgroundColor: "yellow" }}
+                  onClick={() => handleEdit(index)}
+                >
+                  <EditIcon />
+                </IconButton>
+
+                <IconButton
+                  sx={{ backgroundColor: "red" }}
+                  onClick={() => handleDelete(index)}
+                >
+                  <DeleteIcon />
+                </IconButton>
               </TableCell>
             </TableRow>
           ))}
@@ -265,10 +368,10 @@ const Employees = () => {
         aria-label="add"
         onClick={handleOpenDialog}
         style={{
-          position: 'fixed',
+          position: "fixed",
           bottom: 80,
           right: 80,
-          backgroundColor: "green"
+          backgroundColor: "green",
         }}
       >
         <AddIcon />
@@ -279,7 +382,11 @@ const Employees = () => {
         autoHideDuration={6000}
         onClose={() => setAlert({ ...alert, open: false })}
       >
-        <Alert onClose={() => setAlert({ ...alert, open: false })} severity={alert.severity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => setAlert({ ...alert, open: false })}
+          severity={alert.severity}
+          sx={{ width: "100%" }}
+        >
           {alert.message}
         </Alert>
       </Snackbar>

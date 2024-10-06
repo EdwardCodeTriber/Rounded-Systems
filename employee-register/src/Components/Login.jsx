@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; // Import the necessary 
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import Picture from '/registerIcon.png';
 
 const Login = ({ setAdmin }) => {
