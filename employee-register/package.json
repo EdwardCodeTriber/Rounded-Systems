@@ -1,6 +1,6 @@
 {
   "name": "employee-register",
-  "proxy": "http://localhost:3000",
+  "proxy": "http://localhost:5000",
   "private": true,
   "version": "0.0.0",
   "type": "module",

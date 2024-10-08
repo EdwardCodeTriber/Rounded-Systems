@@ -29,7 +29,6 @@ const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [editIndex, setEditIndex] = useState(-1);
   const [employee, setEmployee] = useState({
-    id: "",
     name: "",
     surname: "",
     position: "",
@@ -45,7 +44,7 @@ const Employees = () => {
     message: "",
     severity: "success",
   });
-  const [errors, setErrors] = useState({ email: "", idNumber: "" });
+  const [errors, setErrors] = useState({ email: "" });
 
   useEffect(() => {
     fetchEmployees();
@@ -54,7 +53,7 @@ const Employees = () => {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("/api/employees");
+      const response = await axios.get("http://localhost:5000/api/employees");
       setEmployees(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       showAlert("Failed to fetch employees", "error");
@@ -98,24 +97,30 @@ const Employees = () => {
     setLoading(true);
 
     try {
-      const employeeData = {
-        id: employee.id, // unique identifier
-        name: employee.name,
-        surname: employee.surname,
-        position: employee.position,
-        email: employee.email,
-        idNumber: employee.idNumber,
-        picture: employee.picture || null,
-      };
+      const { name, surname, position, email, idNumber, picture } = employee;
 
       if (editIndex > -1) {
         await axios.put(
-          `http://localhost:5000/api/employees/${employee.id}`,
-          employeeData
+          `http://localhost:5000/api/employees/${employees[editIndex].id}`,
+          {
+            name,
+            surname,
+            position,
+            email,
+            idNumber,
+            picture,
+          }
         );
         showAlert("Employee updated successfully");
       } else {
-        await axios.post("http://localhost:5000/api/employees", employeeData);
+        await axios.post("http://localhost:5000/api/employees", {
+          name,
+          surname,
+          position,
+          email,
+          idNumber,
+          picture,
+        });
         showAlert("Employee added successfully");
       }
 
@@ -125,9 +130,7 @@ const Employees = () => {
       showAlert("Failed to save employee", "error");
     } finally {
       setLoading(false);
-      // Reset the form state
       setEmployee({
-        id: "",
         name: "",
         surname: "",
         position: "",
@@ -139,7 +142,7 @@ const Employees = () => {
     }
   };
 
-  const handleEdit = (index) => {
+  const handleEdit = async (index) => {
     setEditIndex(index);
     setEmployee(employees[index]);
     setOpenDialog(true);
@@ -148,7 +151,7 @@ const Employees = () => {
   const handleDelete = async (id) => {
     setLoading(true);
     try {
-      await axios.delete(`/api/employees/${id}`);
+      await axios.delete(`http://localhost:5000/api/employees/${id}`);
       showAlert("Employee deleted successfully", "error");
       fetchEmployees();
     } catch (error) {
@@ -158,7 +161,7 @@ const Employees = () => {
     }
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -167,9 +170,8 @@ const Employees = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleOpenDialog = () => {
+  const handleOpenDialog = async () => {
     setEmployee({
-      id: "",
       name: "",
       surname: "",
       position: "",
@@ -181,25 +183,19 @@ const Employees = () => {
     setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = async () => {
     setOpenDialog(false);
   };
 
   const filteredEmployees = Array.isArray(employees)
-    ? employees.filter(
-        (emp) =>
-          emp.id &&
-          emp.id.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    ? employees.filter((emp) =>
+        emp.id.toString().toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
 
   return (
     <Container>
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{ display: "flex", justifyContent: "center" }}
-      >
+      <Typography variant="h4" gutterBottom align="center">
         Employee Registration System
       </Typography>
 
@@ -213,7 +209,7 @@ const Employees = () => {
       />
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle sx={{ display: "flex", justifyContent: "center" }}>
+        <DialogTitle align="center">
           {editIndex > -1 ? "Edit Employee" : "Add Employee"}
         </DialogTitle>
         <DialogContent>
@@ -249,7 +245,7 @@ const Employees = () => {
             fullWidth
             margin="dense"
             error={!!errors.email}
-            helperText={errors.email} // Show error message for email validation
+            helperText={errors.email}
           />
           <TextField
             label="ID Number"
@@ -259,9 +255,6 @@ const Employees = () => {
             fullWidth
             margin="dense"
           />
-          <br />
-          <br />
-
           <input
             type="file"
             accept="image/*"
@@ -283,20 +276,12 @@ const Employees = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={handleCloseDialog}
-            color="secondary"
-            sx={{ color: "yellow" }}
-          >
+          <Button onClick={handleCloseDialog} color="secondary">
             Cancel
           </Button>
-          <Button
-            onClick={handleAddEmployee}
-            color="primary"
-            sx={{ color: "green" }}
-          >
+          <Button onClick={handleAddEmployee} color="primary">
             {loading ? (
-              <CircularProgress size={24} sx={{ color: "white" }} />
+              <CircularProgress size={24} />
             ) : editIndex > -1 ? (
               "Update Employee"
             ) : (
@@ -305,17 +290,7 @@ const Employees = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <br />
-      <br />
 
-      <Typography
-        variant="h6"
-        gutterBottom
-        sx={{ display: "flex", justifyContent: "center" }}
-      >
-        Employee List
-      </Typography>
-      <br />
       <Table>
         <TableHead>
           <TableRow>
@@ -344,16 +319,12 @@ const Employees = () => {
                 )}
               </TableCell>
               <TableCell>
-                <IconButton
-                  sx={{ backgroundColor: "yellow" }}
-                  onClick={() => handleEdit(index)}
-                >
+                <IconButton color="primary" onClick={() => handleEdit(index)}>
                   <EditIcon />
                 </IconButton>
-
                 <IconButton
-                  sx={{ backgroundColor: "red" }}
-                  onClick={() => handleDelete(index)}
+                  color="secondary"
+                  onClick={() => handleDelete(emp.id)}
                 >
                   <DeleteIcon />
                 </IconButton>
@@ -363,33 +334,27 @@ const Employees = () => {
         </TableBody>
       </Table>
 
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={4000}
+        onClose={() => setAlert({ ...alert, open: false })}
+      >
+        <Alert severity={alert.severity}>{alert.message}</Alert>
+      </Snackbar>
+
       <Fab
         color="primary"
-        aria-label="add"
         onClick={handleOpenDialog}
-        style={{
+        sx={{
           position: "fixed",
-          bottom: 80,
-          right: 80,
+          bottom: 16,
+          right: 16,
           backgroundColor: "green",
+          color: "white",
         }}
       >
         <AddIcon />
       </Fab>
-
-      <Snackbar
-        open={alert.open}
-        autoHideDuration={6000}
-        onClose={() => setAlert({ ...alert, open: false })}
-      >
-        <Alert
-          onClose={() => setAlert({ ...alert, open: false })}
-          severity={alert.severity}
-          sx={{ width: "100%" }}
-        >
-          {alert.message}
-        </Alert>
-      </Snackbar>
     </Container>
   );
 };
