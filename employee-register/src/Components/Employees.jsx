@@ -152,7 +152,7 @@ const Employees = () => {
     setLoading(true);
     try {
       await axios.delete(`http://localhost:5000/api/employees/${id}`);
-      showAlert("Employee deleted successfully", "error");
+      showAlert("Employee deleted successfully", "success");
       fetchEmployees();
     } catch (error) {
       showAlert("Failed to delete employee", "error");
@@ -276,10 +276,10 @@ const Employees = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="secondary">
+          <Button onClick={handleCloseDialog} color="secondary" sx={{backgroundColor:"#fefce8", color:"#030712"}}>
             Cancel
           </Button>
-          <Button onClick={handleAddEmployee} color="primary">
+          <Button onClick={handleAddEmployee} color="primary" sx={{color:"#475569", backgroundColor:"#bef264"}}>
             {loading ? (
               <CircularProgress size={24} />
             ) : editIndex > -1 ? (

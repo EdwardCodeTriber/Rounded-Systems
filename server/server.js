@@ -2,7 +2,6 @@ const express = require("express");
 const admin = require("firebase-admin");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { v4: uuidv4 } = require("uuid");
 
 // Firebase Admin SDK initialization
 const serviceAccount = require("./employee-node-6d9ec-firebase-adminsdk-44lp0-b147227770.json");
@@ -59,7 +58,7 @@ app.get("/api/employees", async (req, res) => {
 });
 
 // POST METHOD - Add a new employee
-app.post("/api/employees", async (req, res) => {
+app.post("htt/api/employees", async (req, res) => {
   try {
     const { name, surname, position, email, idNumber, picture } = req.body;
 
@@ -67,12 +66,8 @@ app.post("/api/employees", async (req, res) => {
     if (!name || !surname || !position || !email || !idNumber) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-    /// Auto ID
-
-    const employeeId = uuidv4();
 
     const newEmployee = {
-      id: employeeId, // Store this unique ID in the document
       name,
       surname,
       position,
