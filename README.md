@@ -9,7 +9,6 @@
     username: 'admin',
     password: 'admin123',
 
-    #These can be edited on runtime, But if reseted it will start Over from Default
 
 ## Installation
 rounded-systems/employee-register
