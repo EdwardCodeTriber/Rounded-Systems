@@ -68,3 +68,6 @@ This rounded system will build and interface with the ReactJS Employee App:
 - Auth for manage user sessions
 ## Testing:
 - Test the application thoroughly to ensure that all features work as expected
+
+## Hosted Link for the project
+ - https://rounded-systems.vercel.app/
