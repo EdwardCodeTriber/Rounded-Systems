@@ -6,8 +6,8 @@
 
 ## LogIn Credentials
 
-    username: 'admin',
-    password: 'admin123',
+    username: 'admin@gmail.com',
+    password: '123456',
 
 
 ## Installation
