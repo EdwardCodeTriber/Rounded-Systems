@@ -53,7 +53,7 @@ const Employees = () => {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/employees");
+      const response = await axios.get("https://rounded-systems.onrender.com/api/employees");
       setEmployees(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       showAlert("Failed to fetch employees", "error");
@@ -102,7 +102,7 @@ const Employees = () => {
 
       if (editIndex > -1) {
         await axios.put(
-          `http://localhost:5000/api/employees/${employees[editIndex].id}`,
+          `https://rounded-systems.onrender.com/api/employees/${employees[editIndex].id}`,
           {
             name,
             surname,
@@ -114,7 +114,7 @@ const Employees = () => {
         );
         showAlert("Employee updated successfully");
       } else {
-        await axios.post("http://localhost:5000/api/employees", {
+        await axios.post("https://rounded-systems.onrender.com/api/employees", {
           name,
           surname,
           position,
@@ -153,7 +153,7 @@ const Employees = () => {
   const handleDelete = async (id) => {
     setLoading(true);
     try {
-      await axios.delete(`http://localhost:5000/api/employees/${id}`);
+      await axios.delete(`https://rounded-systems.onrender.com/api/employees/${id}`);
       showAlert("Employee deleted successfully", "success");
       fetchEmployees();
     } catch (error) {

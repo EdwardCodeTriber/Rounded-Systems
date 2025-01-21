@@ -139,7 +139,7 @@ const DeletedEmployees = () => {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/deletedEmployees");
+      const response = await axios.get("https://rounded-systems.onrender.com/api/deletedEmployees");
       setEmployees(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       showAlert("Failed to fetch employees", "error");
