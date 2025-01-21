@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 // Firebase Admin SDK initialization
-const serviceAccount = require("./employee-node-6d9ec-firebase-adminsdk-44lp0-b147227770.json");
+const serviceAccount = require("./employee-node-6d9ec-firebase-adminsdk-44lp0-bee7035cde.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: "employee-node-6d9ec.appspot.com",
@@ -54,6 +54,23 @@ app.get("/api/employees", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to fetch employees", details: error.message });
+  }
+});
+
+// GET METHOD - Fetch all employees
+app.get("/api/deletedEmployees", async (req, res) => {
+  try {
+    const snapshot = await db.collection("deletedEmployees").get();
+    const DeletedEmployees = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    res.status(200).json(DeletedEmployees);
+  } catch (error) {
+    console.error("Error fetching DeletedEmployees:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch DeletedEmployees", details: error.message });
   }
 });
 

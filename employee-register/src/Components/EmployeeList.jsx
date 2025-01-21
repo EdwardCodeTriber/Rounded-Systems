@@ -86,44 +86,44 @@ const EmployeeList = ({ admin, setAdmin }) => {
   };
 
   // Update admin's password
-  const handleUpdatePassword = async () => {
-    if (newPassword) {
-      try {
-        await updatePassword(auth.currentUser, newPassword);
-        setAlert({
-          open: true,
-          message: "Password updated successfully",
-          severity: "success",
-        });
-      } catch (error) {
-        console.error("Error updating password:", error);
-        setAlert({
-          open: true,
-          message: "Failed to update password",
-          severity: "error",
-        });
-      }
-    }
-  };
+  // const handleUpdatePassword = async () => {
+  //   if (newPassword) {
+  //     try {
+  //       await updatePassword(auth.currentUser, newPassword);
+  //       setAlert({
+  //         open: true,
+  //         message: "Password updated successfully",
+  //         severity: "success",
+  //       });
+  //     } catch (error) {
+  //       console.error("Error updating password:", error);
+  //       setAlert({
+  //         open: true,
+  //         message: "Failed to update password",
+  //         severity: "error",
+  //       });
+  //     }
+  //   }
+  // };
 
   // Send password reset email
-  const handleSendResetEmail = async () => {
-    try {
-      await sendPasswordResetEmail(auth, newEmail);
-      setAlert({
-        open: true,
-        message: "Password reset email sent",
-        severity: "success",
-      });
-    } catch (error) {
-      console.error("Error sending reset email:", error);
-      setAlert({
-        open: true,
-        message: "Failed to send password reset email",
-        severity: "error",
-      });
-    }
-  };
+  // const handleSendResetEmail = async () => {
+  //   try {
+  //     await sendPasswordResetEmail(auth, newEmail);
+  //     setAlert({
+  //       open: true,
+  //       message: "Password reset email sent",
+  //       severity: "success",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error sending reset email:", error);
+  //     setAlert({
+  //       open: true,
+  //       message: "Failed to send password reset email",
+  //       severity: "error",
+  //     });
+  //   }
+  // };
 
   const handleProfilePictureUpload = (e) => {
     const file = e.target.files[0];
@@ -295,18 +295,18 @@ const EmployeeList = ({ admin, setAdmin }) => {
           <Button onClick={handleCloseProfile} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleUpdateProfile} color="primary">
-            Update Profile
-          </Button>
           <Button onClick={handleUpdateEmail} color="primary">
             Update Email
           </Button>
-          <Button onClick={handleUpdatePassword} color="primary">
+          <Button onClick={handleUpdateProfile} color="primary">
+            Update Profile
+          </Button>
+          {/* <Button onClick={handleUpdatePassword} color="primary">
             Update Password
-          </Button>
-          <Button onClick={handleSendResetEmail} color="primary">
+          </Button> */}
+          {/* <Button onClick={handleSendResetEmail} color="primary">
             Reset Password via Email
-          </Button>
+          </Button> */}
         </DialogActions>
       </Dialog>
 

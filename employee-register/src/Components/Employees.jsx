@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Container,
@@ -57,6 +57,7 @@ const Employees = () => {
       setEmployees(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       showAlert("Failed to fetch employees", "error");
+      console.log(error)
       setEmployees([]);
     } finally {
       setLoading(false);
@@ -128,6 +129,7 @@ const Employees = () => {
       fetchEmployees();
     } catch (error) {
       showAlert("Failed to save employee", "error");
+      console.log(error)
     } finally {
       setLoading(false);
       setEmployee({
@@ -156,6 +158,7 @@ const Employees = () => {
       fetchEmployees();
     } catch (error) {
       showAlert("Failed to delete employee", "error");
+      console.log(error)
     } finally {
       setLoading(false);
     }

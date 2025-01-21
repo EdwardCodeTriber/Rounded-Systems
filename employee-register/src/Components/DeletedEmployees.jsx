@@ -1,10 +1,159 @@
-import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Container, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+// import {useState, useEffect} from 'react';
+// import { AppBar, Toolbar, Typography, Button, Container, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, CircularProgress } from '@mui/material';
+// import axios from "axios";
+// import { Link, useNavigate } from 'react-router-dom';
+// import Footer from './Footer';
+
+// const DeletedEmployees = () => {
+//   // const [employees, setEmployees] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [alert, setAlert] = useState({
+//     open: false,
+//     message: "",
+//     severity: "success",
+//   });
+
+
+//   useEffect(() =>{
+//     fetchEmployees();
+//   }, []);
+
+//   const fetchEmployees = async () => {
+//     setLoading(true);
+//     try {
+//       // const response = 
+//       await axios.get("http://localhost:5000/api/eeletedEmployees");
+//       // setEmployees(Array.isArray(response.data) ? response.data : []);
+//     } catch (error) {
+//       showAlert("Failed to fetch employees", "error");
+//       console.log(error)
+//       // setEmployees([]);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const showAlert = (message, severity = "success") => {
+//     setAlert({ open: true, message, severity });
+//   };
+//   const deletedEmployees = JSON.parse(localStorage.getItem('deletedEmployees')) || [];
+//   const navigate = useNavigate();
+
+//   const handleLogout = () => {
+//     localStorage.removeItem('admin');
+//     navigate('/login');
+//   };
+
+//   return (
+//     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+//       {/* AppBar Section */}
+//       <AppBar position="static" sx={{ backgroundColor: '#475569' }}>
+//         <Toolbar>
+//           <Typography variant="h6" component="div" sx={{ flexGrow: 1, }}>
+//           Left/Previous Employees
+//           </Typography>
+//           <Button color="inherit" component={Link} to="/">
+//             Employee List
+//           </Button>
+//           <Button color="inherit" onClick={handleLogout}>
+//             Logout
+//           </Button>
+//         </Toolbar>
+
+//         {loading ? ( <CircularProgress size={24} />) : ""}
+//       </AppBar>
+//       <main style={{ flex: 1 }}>
+//         <br/>
+//         {/* Main Content Section */}
+//         <Container>
+//           <Typography variant="h6" gutterBottom sx={{ display:'flex', justifyContent:"center"}}>
+//             Left/Previous Employees
+//           </Typography>
+//           <Table>
+//             <TableHead>
+//               <TableRow>
+//                 <TableCell>ID</TableCell>
+//                 <TableCell>Name</TableCell>
+//                 <TableCell>Surname</TableCell>
+//                 <TableCell>Position</TableCell>
+//                 <TableCell>Email</TableCell>
+//                 <TableCell>Phone</TableCell>
+//                 <TableCell>Image</TableCell>
+//               </TableRow>
+//             </TableHead>
+//             <TableBody>
+//               {deletedEmployees.map((emp) => (
+//                 <TableRow key={emp.id}>
+//                   <TableCell>{emp.id}</TableCell>
+//                   <TableCell>{emp.name}</TableCell>
+//                   <TableCell>{emp.surname}</TableCell>
+//                   <TableCell>{emp.position}</TableCell>
+//                   <TableCell>{emp.email}</TableCell>
+//                   <TableCell>{emp.phone}</TableCell>
+//                   <TableCell>
+//                     {emp.picture && <img src={emp.picture} alt={emp.name} width="50" />}
+//                   </TableCell>
+//                 </TableRow>
+//               ))}
+//             </TableBody>
+//           </Table>
+//           <Snackbar
+//                   open={alert.open}
+//                   autoHideDuration={4000}
+//                   onClose={() => setAlert({ ...alert, open: false })}
+//                 >
+//                   <Alert severity={alert.severity}>{alert.message}</Alert>
+//                 </Snackbar>
+//         </Container>
+//       </main>
+//       <Footer /> {/* Footer is pushed to the bottom */}
+//     </div>
+//   );
+// };
+
+// export default DeletedEmployees;
+
+import { useState, useEffect } from 'react';
+import { 
+  AppBar, Toolbar, Typography, Button, Container, 
+  Table, TableBody, TableCell, TableHead, TableRow, 
+  Snackbar, Alert, CircularProgress 
+} from '@mui/material';
+import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import Footer from './Footer';
 
 const DeletedEmployees = () => {
-  const deletedEmployees = JSON.parse(localStorage.getItem('deletedEmployees')) || [];
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:5000/api/deletedEmployees");
+      setEmployees(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      showAlert("Failed to fetch employees", "error");
+      console.error(error);
+      setEmployees([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showAlert = (message, severity = "success") => {
+    setAlert({ open: true, message, severity });
+  };
+
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -17,8 +166,8 @@ const DeletedEmployees = () => {
       {/* AppBar Section */}
       <AppBar position="static" sx={{ backgroundColor: '#475569' }}>
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, }}>
-          Left/Previous Employees
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Left/Previous Employees
           </Typography>
           <Button color="inherit" component={Link} to="/">
             Employee List
@@ -28,44 +177,55 @@ const DeletedEmployees = () => {
           </Button>
         </Toolbar>
       </AppBar>
+
       <main style={{ flex: 1 }}>
-        <br/>
-        {/* Main Content Section */}
         <Container>
-          <Typography variant="h6" gutterBottom sx={{ display:'flex', justifyContent:"center"}}>
+          <Typography variant="h6" gutterBottom sx={{ display:'flex', justifyContent:"center" }}>
             Left/Previous Employees
           </Typography>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Surname</TableCell>
-                <TableCell>Position</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>Image</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {deletedEmployees.map((emp) => (
-                <TableRow key={emp.id}>
-                  <TableCell>{emp.id}</TableCell>
-                  <TableCell>{emp.name}</TableCell>
-                  <TableCell>{emp.surname}</TableCell>
-                  <TableCell>{emp.position}</TableCell>
-                  <TableCell>{emp.email}</TableCell>
-                  <TableCell>{emp.phone}</TableCell>
-                  <TableCell>
-                    {emp.picture && <img src={emp.picture} alt={emp.name} width="50" />}
-                  </TableCell>
+
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Surname</TableCell>
+                  <TableCell>Position</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Image</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {employees.map((emp) => (
+                  <TableRow key={emp.id}>
+                    <TableCell>{emp.id}</TableCell>
+                    <TableCell>{emp.name}</TableCell>
+                    <TableCell>{emp.surname}</TableCell>
+                    <TableCell>{emp.position}</TableCell>
+                    <TableCell>{emp.email}</TableCell>
+                    <TableCell>
+                      {emp.picture && <img src={emp.picture} alt={emp.name} width="50" />}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+
+          <Snackbar
+            open={alert.open}
+            autoHideDuration={4000}
+            onClose={() => setAlert({ ...alert, open: false })}
+          >
+            <Alert severity={alert.severity}>{alert.message}</Alert>
+          </Snackbar>
         </Container>
       </main>
-      <Footer /> {/* Footer is pushed to the bottom */}
+
+      <Footer />
     </div>
   );
 };

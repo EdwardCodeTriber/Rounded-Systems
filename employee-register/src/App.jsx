@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import EmployeeList from './Components/EmployeeList';
 import Login from './Components/Login';
@@ -40,15 +40,15 @@ const App = () => {
   }, []);
 
   // Function to handle sign out
-  const handleLogout = async () => {
-    try {
-      await auth.signOut();
-      // Clear admin state after logging out
-      setAdmin(null); 
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+  // const handleLogout = async () => {
+  //   try {
+  //     await auth.signOut();
+  //     // Clear admin state after logging out
+  //     setAdmin(null); 
+  //   } catch (error) {
+  //     console.error('Error signing out:', error);
+  //   }
+  // };
 
   return (
     <Router>

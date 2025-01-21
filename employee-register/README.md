@@ -5,15 +5,19 @@
 
 ## LogIn Credentials
 
-    username: 'admin',
-    password: 'admin123',
+    username: 'admin@gmail.com',
+    password: '123456',
 
     #These can be edited on runtime, But if reseted it will start Over from Default
 
 ## Installation
 - npm install @mui/material @emotion/react @emotion/styled @mui/icons-material react-router-dom
-## Run 
-- npm run dev
+## Run empoyee-register
+  # cd empoyee-register
+  - npm run dev
+## Run server
+  # cd server
+  - node server
 ## Requirements
 ## Search Function:
 - Users can search for employees by ID.
